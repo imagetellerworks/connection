@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="ko" class="pta-public">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#08090b">
+  <meta name="description" content="검은 공간에서 점과 점이 만나 선이 되는 실시간 비주얼. 별도의 모바일 컨트롤러와 프로젝션 화면.">
+  <meta name="referrer" content="no-referrer">
+  <title>CONNECTIONS — Live Visual Instrument</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='8' fill='%2308090b'/%3E%3Cpath d='M10 28L20 10L31 26L10 28' fill='none' stroke='%23ff5754'/%3E%3Cg fill='%23ff5754'%3E%3Ccircle cx='10' cy='28' r='3'/%3E%3Ccircle cx='20' cy='10' r='3'/%3E%3Ccircle cx='31' cy='26' r='3'/%3E%3C/g%3E%3C/svg%3E">
+  <style>
+:root{color-scheme:dark;--bg:#08090b;--panel:#101114;--line:#26272d;--muted:#878991;--text:#ebebee;--accent:#ff5754;--soft:#1a1b20;--mono:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;--sans:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Noto Sans KR',sans-serif}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}body{font-size:14px}button,input,select{font:inherit}button,a,input{ -webkit-tap-highlight-color:transparent}button,a{touch-action:manipulation}button{cursor:pointer;color:inherit}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px}button{border:1px solid var(--line);background:transparent;border-radius:7px;min-height:40px;padding:9px 13px;transition:background .15s,border-color .15s,color .15s}button:hover{background:#212227;border-color:#41424a}button.active{color:var(--accent);background:#271617;border-color:#64302e}a{color:inherit;text-decoration:none}.primary{background:var(--accent);color:#100a0a;border-color:var(--accent);font-weight:650}.primary:hover{background:#ff716e;border-color:#ff716e}.quiet{color:#acadb5}svg{display:block;flex-shrink:0}.icon{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}.button-content{display:inline-flex;align-items:center;gap:8px}
+.topbar{height:82px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px;gap:16px}.brand{display:flex;align-items:center;gap:13px}.brand-mark{color:var(--accent);width:34px;height:34px}.brand-name{font-size:20px;letter-spacing:4.5px;font-weight:500;line-height:1}.brand-sub{margin-top:7px;font-family:var(--mono);font-size:9px;letter-spacing:1.7px;color:var(--muted)}.top-actions{display:flex;align-items:center;gap:9px}.status{display:flex;align-items:center;gap:8px;color:#b0b0b7;font-family:var(--mono);font-size:10px;letter-spacing:.3px;white-space:nowrap;margin-right:10px}.status-dot{width:6px;height:6px;flex-shrink:0;border-radius:50%;background:#8e8f96}.status.live .status-dot{background:#8edead;box-shadow:0 0 8px #8edead35}.status.offline .status-dot{background:#ff5754}.top-actions button{font-size:12px}.workspace{max-width:2000px;padding:26px 30px 14px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 332px;gap:24px;min-height:calc(100vh - 120px)}.stage-column{display:flex;flex-direction:column;min-width:0}.section-kicker{display:flex;justify-content:space-between;align-items:center;margin:0 0 14px;font-family:var(--mono);letter-spacing:1.5px;font-size:10px;color:var(--muted)}.section-kicker strong{font-weight:400;color:#bdbfc6}.section-kicker .tag{letter-spacing:.9px;font-size:9px;border:1px solid var(--line);padding:5px 7px;border-radius:3px}.stage-shell{position:relative;display:flex;align-items:center;justify-content:center;flex:1;min-height:340px;max-height:calc(100vh - 300px);border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#000}.stage-shell canvas{display:block;width:100%;height:100%;min-height:340px;position:absolute;inset:0;touch-action:none;cursor:crosshair}.stage-corner{position:absolute;width:14px;height:14px;border-color:#66666e;border-style:solid;opacity:.45;pointer-events:none}.corner-tl{left:18px;top:18px;border-width:1px 0 0 1px}.corner-tr{right:18px;top:18px;border-width:1px 1px 0 0}.corner-bl{left:18px;bottom:18px;border-width:0 0 1px 1px}.corner-br{right:18px;bottom:18px;border-width:0 1px 1px 0}.stage-label{position:absolute;left:27px;top:23px;pointer-events:none;display:flex;align-items:center;gap:8px;font:9px var(--mono);letter-spacing:1.5px;color:#71737b}.stage-label i{width:4px;height:4px;background:var(--accent);border-radius:50%}.stage-badge{position:absolute;right:26px;top:22px;color:#71737b;font:9px var(--mono);letter-spacing:1px;pointer-events:none}.stage-telemetry{position:absolute;bottom:26px;left:28px;display:flex;gap:24px;font-family:var(--mono);pointer-events:none}.stage-telemetry span{display:block;font-size:9px;color:#62656e;letter-spacing:1px}.stage-telemetry b{display:block;margin-top:5px;color:#bec0c6;font-size:13px;font-weight:400}.stage-fps{position:absolute;right:27px;bottom:26px;font:10px var(--mono);color:#777b83}.stage-caption{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);padding:13px 0 17px;font-size:11px}.stage-caption kbd{font:10px var(--mono);border:1px solid #32343b;border-radius:3px;padding:2px 4px;margin-right:4px;color:#b5b7bf}.transport{border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;padding:12px;gap:9px;background:#0e0f12}.transport .primary{min-width:146px}.transport button{font-size:12px}.transport .divider{height:25px;width:1px;background:var(--line);margin:0 1px}.transport .blackout{margin-left:auto;border-color:#393b42;background:#08090b}.transport .blackout.active{background:#4b1618;border-color:var(--accent);color:#fff}.timeline{height:2px;width:100%;margin-top:10px;background:#24252b;overflow:hidden;border-radius:1px}.timeline div{height:100%;width:0;background:var(--accent);transition:width .5s linear}.under-stage{display:flex;justify-content:space-between;align-items:center;padding-top:22px;gap:18px}.editorial{font-size:20px;letter-spacing:-.7px;color:#c0c1c7;font-weight:350;line-height:1.35}.editorial em{font-style:normal;color:#676971}.session-note{text-align:right;font:9px var(--mono);color:#666972;line-height:1.9;letter-spacing:1px}.bottomline{display:flex;justify-content:space-between;gap:16px;padding:0 30px 17px;color:#666974;font:9px var(--mono);letter-spacing:1.4px}.bottomline .red{color:var(--accent)}
+.control-panel{min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--panel);display:flex;flex-direction:column;align-self:stretch;max-height:calc(100vh - 137px);overflow:hidden}.panel-head{padding:19px 20px 16px;display:flex;align-items:center;justify-content:space-between}.panel-title{font-size:13px;font-weight:550;letter-spacing:.2px}.panel-sub{font:9px var(--mono);color:var(--muted);letter-spacing:1px;margin-top:6px}.panel-icon{color:#73767d}.tabs{display:flex;margin:0 17px;border-bottom:1px solid var(--line);gap:6px}.tabs button{flex:1;min-height:39px;border:0;border-bottom:2px solid transparent;border-radius:0;font-size:11px;color:#838690;background:none;padding:8px 3px}.tabs button[aria-selected=true]{color:#f0f0f2;border-bottom-color:var(--accent)}.panel-scroll{padding:20px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#35363d transparent;overscroll-behavior:contain;flex:1}.tab-content[hidden]{display:none}.control-group{margin-bottom:25px}.control-group:last-child{margin-bottom:8px}.control-label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;margin-bottom:11px;color:#babdc5}.control-label .en{margin-left:4px;font-size:9px;color:#676b75;font-family:var(--mono)}output{font:11px var(--mono);color:#dddddf;text-align:right}.range-wrap{position:relative;display:flex;align-items:center;height:15px}input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:linear-gradient(to right,var(--accent) 0%,var(--accent) var(--pct,40%),#30323a var(--pct,40%),#30323a 100%);border:0;outline:none;border-radius:3px;cursor:pointer;touch-action:pan-y;margin:0}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:11px;height:11px;background:#e8e8ea;border-radius:50%;border:2px solid #101114;box-shadow:0 0 0 1px #575a62}input[type=range]::-moz-range-thumb{width:9px;height:9px;background:#e8e8ea;border-radius:50%;border:2px solid #101114;box-shadow:0 0 0 1px #575a62}.range-ends{display:flex;justify-content:space-between;font:8px var(--mono);color:#5f626c;margin-top:7px}.subheading{font:9px var(--mono);color:#717580;letter-spacing:1.6px;text-transform:uppercase;margin:3px 0 15px}.panel-rule{height:1px;background:var(--line);margin:22px 0}.segmented{display:flex;gap:5px}.segmented button{flex:1;min-height:35px;padding:7px;font-size:11px}.swatch{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;background:#eee}.swatch.red{background:#ff5754}.swatch.dual{background:linear-gradient(90deg,#fff 50%,#ff5754 50%)}.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px}.modes button{min-height:68px;text-align:left;padding:12px;font-size:12px}.modes small{display:block;color:#797d87;font:9px var(--mono);margin-top:5px}.modes button.active small{color:#ad7473}.panel-footer{border-top:1px solid var(--line);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#747984;font:9px var(--mono)}.panel-footer button{border:0;min-height:26px;font-size:10px;padding:4px;color:#979da7}.cue-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cue{min-height:122px;padding:10px;text-align:left;position:relative;overflow:hidden;background:#0a0b0d}.cue-visual{width:100%;height:49px;margin-bottom:9px;opacity:.75}.cue .cue-num{position:absolute;top:10px;right:10px;font:8px var(--mono);color:#61656e}.cue-title{font-size:12px;color:#c9cbd0}.cue small{display:block;font-size:9px;color:#777d86;margin-top:5px}.cue.active .cue-title{color:var(--accent)}.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:18px}.action-grid button{font-size:11px}.saved-list{display:flex;flex-direction:column;gap:7px;margin-top:12px}.saved-item{display:flex;gap:7px}.saved-item button:first-child{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}.saved-item button:last-child{color:#767b85;padding:8px;min-width:35px}.empty-note,.help-text{font-size:11px;color:#878c97;line-height:1.8;margin:10px 0 0}.notice{display:none;border:1px solid #493531;background:#1b1513;color:#c6ada4;border-radius:6px;padding:10px 13px;font-size:11px;line-height:1.65;margin-bottom:15px}.notice.visible{display:block}.keyboard-note{color:#676b75;font-size:10px;line-height:1.8;margin-top:20px}.keyboard-note kbd{color:#9ca0aa;font:10px var(--mono)}
+.modal-backdrop{position:fixed;inset:0;background:#000c;backdrop-filter:blur(8px);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}.modal-backdrop[hidden]{display:none}.modal{width:min(560px,100%);max-height:90dvh;overflow:auto;padding:28px;border-radius:12px;background:#121317;border:1px solid #353740;box-shadow:0 30px 100px #0008}.modal-top{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:15px}.modal h2{font-size:19px;letter-spacing:-.3px;margin:0;font-weight:500}.modal-top button{min-height:30px;min-width:30px;padding:4px}.modal p{color:#989da8;font-size:12px;line-height:1.85;margin:10px 0}.modal h3{font-size:12px;font-weight:500;margin-top:24px}.modal .field{width:100%;padding:12px;border:1px solid #33353e;border-radius:6px;background:#08090b;color:#d6d9df;font:12px var(--mono);min-height:44px}.modal-row{display:flex;gap:8px;margin:10px 0}.modal-row .field{min-width:0}.modal-row button{white-space:nowrap;font-size:11px}.key-code{display:block;padding:14px;border:1px dashed #454047;color:#e5aaa5;font:18px var(--mono);text-align:center;letter-spacing:2px;border-radius:6px;user-select:all}.modal .alert{color:#ccaaa3;font-size:11px}.modal code{font:11px var(--mono);color:#d4d6dc}.toast{position:fixed;left:50%;bottom:27px;transform:translate(-50%,15px);background:#25272d;color:#e7e8eb;border:1px solid #494b53;border-radius:8px;padding:12px 18px;font-size:12px;max-width:min(530px,90vw);text-align:center;z-index:150;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}.toast.visible{opacity:1;transform:translate(-50%,0)}[hidden]{display:none!important}.display-toolbar{display:none}.display-welcome{display:none}
+body[data-mode=display]{background:#000;overflow:hidden}body[data-mode=display] .topbar,body[data-mode=display] .control-panel,body[data-mode=display] .section-kicker,body[data-mode=display] .stage-caption,body[data-mode=display] .transport,body[data-mode=display] .under-stage,body[data-mode=display] .bottomline,body[data-mode=display] .notice,body[data-mode=display] .stage-label,body[data-mode=display] .stage-badge,body[data-mode=display] .stage-telemetry,body[data-mode=display] .stage-fps,body[data-mode=display] .stage-corner,body[data-mode=display] .timeline{display:none}body[data-mode=display] .workspace{display:block;padding:0;max-width:none;height:100dvh;min-height:0}body[data-mode=display] .stage-column{height:100%}body[data-mode=display] .stage-shell{position:fixed;inset:0;border:0;border-radius:0;min-height:0;max-height:none}body[data-mode=display] canvas{min-height:0;cursor:none}body[data-mode=display] .display-toolbar{display:flex;position:fixed;z-index:20;top:18px;left:50%;transform:translateX(-50%);gap:8px;padding:9px;border:1px solid #34353e;border-radius:9px;background:#121317e8;white-space:nowrap;transition:opacity .2s}body[data-mode=display] .display-toolbar button{font-size:12px}body[data-mode=display].chrome-hidden .display-toolbar{opacity:0;pointer-events:none}body[data-mode=display] .display-welcome{display:block;position:fixed;z-index:19;bottom:25px;left:0;right:0;color:#858a95;font-size:12px;text-align:center;pointer-events:none}body[data-mode=display].chrome-hidden .display-welcome{display:none}body[data-mode=control] .editorial{font-size:17px}
+@media(min-width:1600px){.workspace{grid-template-columns:minmax(0,1fr) 356px;gap:28px}.control-panel{max-height:calc(100vh - 137px)}.panel-scroll{padding:24px}.control-group{margin-bottom:28px}.stage-shell{min-height:440px}}
+@media(max-width:1100px){.topbar{padding:0 20px;height:74px}.workspace{padding:20px;gap:17px;grid-template-columns:minmax(0,1fr) 302px;min-height:calc(100vh - 110px)}.brand-name{font-size:17px;letter-spacing:3px}.status{margin-right:0;font-size:9px}.status .status-detail{display:none}.transport{flex-wrap:wrap;gap:7px}.transport .primary{min-width:120px;flex:1}.transport button{font-size:11px;padding:8px 10px}.transport .divider{display:none}.transport .blackout{margin-left:0}.editorial{font-size:17px}.session-note{font-size:8px}.bottomline{padding:0 20px 18px;font-size:8px}.stage-caption .keyboard-shortcuts{display:none}.control-panel{max-height:calc(100vh - 130px)}.panel-scroll{padding:18px}.stage-shell{max-height:calc(100vh - 330px)}}
+@media(max-width:760px){.topbar{height:65px;padding:0 15px;gap:10px}.brand{gap:8px}.brand-mark{width:28px;height:28px}.brand-name{font-size:16px;letter-spacing:2.8px}.brand-sub{font-size:7px;letter-spacing:.9px}.top-actions{gap:6px}.top-actions button{min-height:35px;font-size:10px;padding:8px}.top-actions .button-content{gap:4px}.top-actions .icon{width:14px;height:14px}.top-actions .long-label{display:none}.topbar .status{display:none}.workspace{display:flex;flex-direction:column;padding:15px;gap:17px;min-height:0}.section-kicker{margin-bottom:10px;font-size:9px}.stage-shell{height:auto;min-height:0;max-height:none;aspect-ratio:16/10;flex:none;border-radius:7px}.stage-shell canvas{min-height:0}.stage-label{left:18px;top:18px;font-size:8px}.stage-badge{right:18px;top:18px;font-size:8px}.stage-telemetry{left:18px;bottom:18px;gap:20px}.stage-telemetry span{font-size:7px}.stage-telemetry b{font-size:10px;margin-top:4px}.stage-fps{right:18px;bottom:18px;font-size:8px}.stage-corner{width:8px;height:8px}.corner-tl{left:10px;top:10px}.corner-tr{right:10px;top:10px}.corner-bl{left:10px;bottom:10px}.corner-br{right:10px;bottom:10px}.stage-caption{font-size:10px;padding:10px 0 13px;line-height:1.65}.transport{padding:9px;gap:6px;flex-wrap:nowrap}.transport .primary{min-width:100px;padding:9px 7px;font-size:10px}.transport button{min-height:38px;padding:8px;font-size:10px}.transport .button-content{gap:5px}.transport .icon{width:13px;height:13px}.transport .blackout{margin-left:auto}.under-stage{display:none}.timeline{margin-top:8px}.control-panel{max-height:none;min-height:0;overflow:visible;border-radius:8px}.panel-head{padding:16px 17px}.panel-title{font-size:12px}.panel-sub{font-size:8px}.tabs{margin:0 17px}.tabs button{min-height:42px;font-size:12px}.panel-scroll{padding:23px 20px;overflow:visible}.control-group{margin-bottom:26px}.control-label{font-size:12px;margin-bottom:14px}.range-wrap{height:20px}input[type=range]{height:4px}input[type=range]::-webkit-slider-thumb{width:17px;height:17px}.range-ends{font-size:9px}.control-label .en{font-size:9px}output{font-size:12px}.segmented button{min-height:42px}.cue{min-height:140px}.cue-visual{height:60px}.bottomline{padding:0 15px 20px;line-height:1.8;font-size:8px;gap:15px}.bottomline span:last-child{max-width:155px;text-align:right}.notice{font-size:10px;padding:9px 11px;margin-bottom:12px}.modal{padding:22px}.modal h2{font-size:17px}.modal-row{flex-wrap:wrap}.modal-row .field{flex:1 1 190px}.modal-row button{flex:1;min-height:42px}.display-toolbar{max-width:95vw;flex-wrap:wrap;justify-content:center}.display-welcome{font-size:10px!important}.panel-footer{padding:12px 17px}.panel-footer span{font-size:8px}}
+@media(prefers-reduced-motion:reduce){button,.toast,.timeline div{transition:none}}
+@media(max-width:760px){.brand{min-width:0}.brand-mark{width:24px;height:24px}.brand-name{font-size:14px;letter-spacing:1.5px;white-space:nowrap}.brand-sub{font-size:6px;letter-spacing:.6px;white-space:nowrap}.top-actions{flex-shrink:0}.top-actions button{white-space:nowrap}}
+
+</style>
+
+<link rel="stylesheet" href="mindful-ui.css">
+<script src="mindful-ui.js" data-scene="connection" defer></script>
+</head>
+<body data-mode="studio">
+  <header class="topbar">
+    <a class="brand" href="#" id="brandHome" aria-label="CONNECTIONS 스튜디오">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M6 29L18 8L33 27L6 29M18 8L23 21L6 29M23 21L33 27" stroke="currentColor" stroke-width=".9" fill="none"/><g fill="currentColor"><circle cx="6" cy="29" r="2.4"/><circle cx="18" cy="8" r="2.4"/><circle cx="33" cy="27" r="2.4"/><circle cx="23" cy="21" r="1.5"/></g></svg>
+      <div><div class="brand-name">CONNECTIONS</div><div class="brand-sub">LIVE VISUAL INSTRUMENT / IMAGETELLER</div></div>
+    </a>
+    <div class="top-actions">
+      <div class="status" id="connectionStatus" role="status"><i class="status-dot"></i><span id="statusLabel">INITIALIZING</span></div>
+      <button id="connectBtn"><span class="button-content"><svg class="icon" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg><span>기기 연결</span></span></button>
+      <button id="openDisplayBtn" class="primary"><span class="button-content"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 21h8M12 16v5"/></svg><span>송출<span class="long-label"> 화면 열기</span></span></span></button>
+    </div>
+  </header>
+  <main class="workspace">
+    <section class="stage-column" aria-label="실시간 그래픽 미리보기">
+      <div class="notice" id="localNotice">미리보기 모드입니다. 아이폰·아이패드와 연결하려면 컴퓨터에서 동봉된 서버를 실행하세요.</div>
+      <div class="section-kicker"><strong id="stageKicker">01 / LIVE CANVAS</strong><span class="tag" id="sessionTag">STUDIO MODE</span></div>
+      <div class="stage-shell" id="stageShell">
+        <canvas id="stage" aria-label="실시간 점·선 네트워크. 한 손가락으로 밀어내고 두 손가락으로 확대하세요."></canvas>
+        <span class="stage-corner corner-tl"></span><span class="stage-corner corner-tr"></span><span class="stage-corner corner-bl"></span><span class="stage-corner corner-br"></span>
+        <div class="stage-label"><i></i>LIVE PREVIEW</div><div class="stage-badge">1920 × 1080 / ADAPTIVE</div>
+        <div class="stage-telemetry"><div><span>PARTICLES</span><b id="statParticles">720</b></div><div><span>CONNECTIONS</span><b id="statLines">—</b></div><div><span>SCENE</span><b id="statScene">CONNECT</b></div></div>
+        <div class="stage-fps" id="statFps">— FPS</div>
+      </div>
+      <div class="stage-caption"><span id="gestureHint">화면을 드래그해 점을 밀어내세요. 두 손가락으로 확대·축소.</span><span class="keyboard-shortcuts"><kbd>SPACE</kbd>일시정지 &nbsp; <kbd>F</kbd>전체화면</span></div>
+      <div class="transport" aria-label="라이브 재생 조작">
+        <button class="primary" id="sequenceBtn"><span class="button-content"><svg class="icon" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M8 12h8M12 9l3 3-3 3"/></svg><span>점 → 선 시퀀스</span></span></button>
+        <div class="divider"></div>
+        <button id="pauseBtn" aria-pressed="false"><span class="button-content"><svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg><span id="pauseLabel">일시정지</span></span></button>
+        <button id="pulseBtn">호출</button>
+        <button class="blackout" id="blackoutBtn" aria-pressed="false">암전</button>
+      </div>
+      <div class="timeline" aria-hidden="true"><div id="sequenceProgress"></div></div>
+      <div class="under-stage"><div class="editorial">Points become lines.<br><em>Connections become stories.</em></div><div class="session-note">PART-TIME ANGELS<br>REAL-TIME / GENERATIVE / INTERACTIVE</div></div>
+    </section>
+    <aside class="control-panel" aria-label="비주얼 컨트롤 패널">
+      <div class="panel-head"><div><div class="panel-title">컨트롤 패널</div><div class="panel-sub" id="panelSubtitle">02 / VISUAL PARAMETERS</div></div><svg class="icon panel-icon" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.5" fill="#101114"/><circle cx="16" cy="17" r="2.5" fill="#101114"/></svg></div>
+      <div class="tabs" role="tablist" aria-label="컨트롤 카테고리"><button id="tab-visual" role="tab" aria-selected="true" aria-controls="visualPanel" data-tab="visual">비주얼</button><button id="tab-motion" role="tab" aria-selected="false" aria-controls="motionPanel" data-tab="motion" tabindex="-1">움직임</button><button id="tab-scenes" role="tab" aria-selected="false" aria-controls="scenesPanel" data-tab="scenes" tabindex="-1">장면·저장</button></div>
+      <div class="panel-scroll" id="panelScroll">
+        <section id="visualPanel" class="tab-content" role="tabpanel" aria-labelledby="tab-visual">
+          <div id="visualSliders"></div>
+          <div class="panel-rule"></div><div class="subheading">COLOR PALETTE</div>
+          <div class="segmented" id="colorModes" aria-label="점과 선의 색상"><button data-color="white" aria-pressed="false"><span class="swatch"></span>화이트</button><button data-color="red" aria-pressed="false"><span class="swatch red"></span>레드</button><button data-color="dual" aria-pressed="true" class="active"><span class="swatch dual"></span>듀얼</button></div>
+          <div id="colorSlider" style="margin-top:22px"></div>
+        </section>
+        <section id="motionPanel" class="tab-content" role="tabpanel" aria-labelledby="tab-motion" hidden>
+          <div class="subheading">MOVEMENT BEHAVIOR</div><div class="modes"><button data-motion="flow" class="active" aria-pressed="true">흐르기<small>ORGANIC FLOW</small></button><button data-motion="orbit" aria-pressed="false">공전하기<small>ORBIT</small></button><button data-motion="gather" aria-pressed="false">모이기<small>GATHER</small></button><button data-motion="breathe" aria-pressed="false">숨쉬기<small>BREATHE</small></button></div>
+          <div id="motionSliders"></div><div class="panel-rule"></div><div class="subheading">TOUCH INTERACTION</div>
+          <div class="segmented"><button data-interaction="repel" class="active" aria-pressed="true">밀어내기</button><button data-interaction="attract" aria-pressed="false">끌어당기기</button></div>
+          <div class="action-grid"><button id="explodeBtn">전체 흩뜨리기</button><button id="gatherBtn">중앙으로 모으기</button></div>
+          <p class="help-text">검은 미리보기 화면이 터치패드입니다. 한 손가락은 점을 움직이고, 두 손가락은 확대·축소합니다. 슬라이더 바깥에서는 평소처럼 스크롤할 수 있습니다.</p>
+        </section>
+        <section id="scenesPanel" class="tab-content" role="tabpanel" aria-labelledby="tab-scenes" hidden>
+          <div class="subheading">LIVE SCENES / 01—04</div><div class="cue-grid" id="cueGrid"></div>
+          <div class="panel-rule"></div><div class="subheading">YOUR PRESETS</div><button id="savePresetBtn" style="width:100%">현재 설정 저장</button><div class="saved-list" id="savedList"></div>
+          <div class="action-grid"><button id="exportBtn">설정 내보내기</button><button id="importBtn">설정 불러오기</button></div><input type="file" id="importFile" accept=".json,application/json" hidden>
+          <p class="help-text">저장한 설정은 이 브라우저에 보관됩니다. 다른 기기로 옮길 때는 JSON 파일로 내보내세요.</p><div class="keyboard-note"><kbd>1–4</kbd> 장면 전환 &nbsp; <kbd>P</kbd> 호출 &nbsp; <kbd>E</kbd> 흩뜨리기<br><kbd>B</kbd> 암전 &nbsp; <kbd>F</kbd> 전체화면 &nbsp; <kbd>H</kbd> 송출 메뉴</div>
+        </section>
+      </div>
+      <div class="panel-footer"><span id="footerStatus">LOCAL PREVIEW</span><button id="resetBtn">기본값으로 초기화 ↺</button></div>
+    </aside>
+  </main>
+  <footer class="bottomline"><span><span class="red">●</span> IMAGETELLER LAB / CONNECTIONS V1.0</span><span>BLACK CANVAS. INFINITE POSSIBILITIES.</span></footer>
+  <div class="display-toolbar"><button id="displayFullscreenBtn" class="primary">전체화면으로 송출</button><button id="hideChromeBtn">메뉴 숨기기</button><button id="displayConnectBtn">기기 연결</button><button id="displayBackBtn">스튜디오</button></div>
+  <div class="display-welcome">전체화면으로 전환한 뒤 메뉴가 사라집니다. H 키로 메뉴를 다시 여세요.</div>
+  <div class="modal-backdrop" id="modalBackdrop" hidden><section class="modal" id="modalBox" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div class="modal-top"><h2 id="modalTitle">기기 연결</h2><button id="modalClose" aria-label="닫기">×</button></div><div id="modalContent"></div></section></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+/* CONNECTIONS · shared, bounded scene state. No third-party dependencies. */
+(function (root) {
+  'use strict';
+  const defaults = Object.freeze({
+    count: 720, distance: 132, speed: 0.65, size: 1.65, lineWidth: 0.7,
+    opacity: 0.42, brightness: 1, redRatio: 0.34, trail: 0.2, zoom: 1,
+    mode: 'flow', color: 'dual', interaction: 'repel', paused: false,
+    blackout: false, seed: 284719, scene: 'connect', sequenceAt: 0, pauseAt: 0
+  });
+  const ranges = {
+    count: [60, 1800, true], distance: [0, 260], speed: [0, 2.5],
+    size: [0.4, 4], lineWidth: [0.2, 2.5], opacity: [0, 1],
+    brightness: [0.1, 1.8], redRatio: [0, 1], trail: [0, 0.92],
+    zoom: [0.5, 2.5], seed: [1, 2147483646, true], sequenceAt: [0, 10000000000000], pauseAt: [0, 10000000000000]
+  };
+  const choices = {
+    mode: ['flow', 'orbit', 'gather', 'breathe'],
+    color: ['white', 'red', 'dual'], interaction: ['repel', 'attract'],
+    scene: ['isolate', 'call', 'connect', 'collapse', 'custom', 'sequence']
+  };
+  function clean(input) {
+    const output = {};
+    if (!input || typeof input !== 'object' || Array.isArray(input)) return output;
+    for (const [key, value] of Object.entries(input)) {
+      if (Object.hasOwn(ranges, key) && typeof value === 'number' && Number.isFinite(value)) {
+        const [min, max, integer] = ranges[key];
+        output[key] = Math.min(max, Math.max(min, integer ? Math.round(value) : value));
+      } else if (Object.hasOwn(choices, key) && choices[key].includes(value)) output[key] = value;
+      else if (['paused', 'blackout'].includes(key) && typeof value === 'boolean') output[key] = value;
+    }
+    return output;
+  }
+  const presets = {
+    isolate: { count: 280, distance: 0, speed: 0.3, size: 1.7, opacity: 0, mode: 'flow', color: 'white', redRatio: 0, trail: 0.1, zoom: 1, scene: 'isolate', sequenceAt: 0 },
+    call: { count: 550, distance: 90, speed: 0.5, size: 1.8, opacity: 0.35, mode: 'breathe', color: 'dual', redRatio: 0.18, trail: 0.15, zoom: 1, scene: 'call', sequenceAt: 0 },
+    connect: { ...defaults },
+    collapse: { count: 900, distance: 72, speed: 1.5, size: 1.3, opacity: 0.32, mode: 'flow', color: 'dual', redRatio: 0.7, trail: 0.64, zoom: 1.08, scene: 'collapse', sequenceAt: 0 }
+  };
+  const result = { defaults, ranges, choices, clean, presets };
+  if (typeof module !== 'undefined' && module.exports) module.exports = result;
+  else root.Connections = result;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+  <script>
+/* Real-time 2D constellation renderer. Virtual 1920 × 1080 stage.
+   Spatial hashing + bounded neighbors keep dense scenes responsive. */
+'use strict';
+class ConnectionRenderer {
+  constructor(canvas, getState, onStats, getClock) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d', { alpha: false });
+    if (!this.ctx) throw new Error('이 브라우저에서 Canvas 2D를 시작할 수 없습니다.');
+    this.getState = getState; this.onStats = onStats; this.getClock = getClock;
+    this.points = []; this.edges = new Map(); this.pulses = [];
+    this.interactors = new Map(); this.seed = 0; this.t = 0;
+    this.fps = 60; this.frames = 0; this.lastStats = 0;
+    this.last = performance.now(); this.dpr = 1; this.forceClear = true;
+    this.config = { ...getState() }; this.sequenceTime = 0; this.sequenceStamp = 0;
+    this.resizeObserver = new ResizeObserver(() => this.resize());
+    this.resizeObserver.observe(canvas); this.resize();
+    this.loop = this.loop.bind(this); this.raf = requestAnimationFrame(this.loop);
+  }
+  random() {
+    let t = this.rng += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+  point(index) {
+    const r = () => this.random();
+    // Intersecting organic filaments, with enough negative space between them.
+    const strand = Math.floor(r() * 3), x = r() * 2080 - 80;
+    const base = 540 + Math.sin(x / 370 + strand * 1.7) * 210;
+    let y = base + (r() + r() + r() - 1.5) * 205;
+    if (r() < 0.12) y = r() * 1080;
+    const a = r() * Math.PI * 2;
+    return { id: index, x, y, vx: Math.cos(a) * 0.25, vy: Math.sin(a) * 0.25,
+      phase: r() * 6.283, red: r(), scale: 0.55 + r() * 0.85, twinkle: r(), homeX: x, homeY: y };
+  }
+  rebuild(seed, count) {
+    this.seed = seed; this.rng = seed; this.points = [];
+    for (let i = 0; i < count; i++) this.points.push(this.point(i));
+    this.edges.clear(); this.pulses = []; this.forceClear = true; this.t = 0;
+  }
+  resize() {
+    const r = this.canvas.getBoundingClientRect();
+    this.w = Math.max(1, r.width); this.h = Math.max(1, r.height);
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.canvas.width = Math.round(this.w * this.dpr);
+    this.canvas.height = Math.round(this.h * this.dpr);
+    this.scale = Math.min(this.w / 1920, this.h / 1080);
+    this.offsetX = (this.w - 1920 * this.scale) / 2;
+    this.offsetY = (this.h - 1080 * this.scale) / 2;
+    this.forceClear = true;
+  }
+  toStage(clientX, clientY) {
+    const r = this.canvas.getBoundingClientRect();
+    return { x: Math.max(0, Math.min(1, (clientX - r.left - this.offsetX) / (this.scale * 1920))),
+      y: Math.max(0, Math.min(1, (clientY - r.top - this.offsetY) / (this.scale * 1080))) };
+  }
+  action(action) {
+    const { type } = action;
+    if (type === 'pulse') {
+      this.pulses.push({ x: (action.x ?? 0.5) * 1920, y: (action.y ?? 0.5) * 1080, age: 0 });
+      if (this.pulses.length > 8) this.pulses.shift();
+    }
+    if (type === 'explode') {
+      const x = (action.x ?? 0.5) * 1920, y = (action.y ?? 0.5) * 1080;
+      for (const p of this.points) {
+        const dx = p.x - x, dy = p.y - y, d = Math.hypot(dx, dy) || 1;
+        const strength = 5 + 14 * Math.exp(-d / 600);
+        p.vx += dx / d * strength; p.vy += dy / d * strength;
+      }
+      this.pulses.push({ x, y, age: 0 });
+    }
+    if (type === 'pointer') {
+      if (action.active) this.interactors.set(action.client || 'local', { ...action, at: performance.now() });
+      else this.interactors.delete(action.client || 'local');
+    }
+    if (type === 'reset') this.rebuild(this.getState().seed, this.getState().count);
+  }
+  loop(now) {
+    this.raf = requestAnimationFrame(this.loop);
+    const dt = Math.min(0.05, Math.max(0.001, (now - this.last) / 1000)); this.last = now;
+    const state = this.getState();
+    if (state.seed !== this.seed) this.rebuild(state.seed, state.count);
+    while (this.points.length < state.count) this.points.push(this.point(this.points.length));
+    if (this.points.length > state.count) this.points.length = state.count;
+    for (const key of ['distance', 'speed', 'size', 'lineWidth', 'opacity', 'brightness', 'redRatio', 'trail', 'zoom']) {
+      this.config[key] += (state[key] - this.config[key]) * Math.min(1, dt * 5);
+    }
+    const c = { ...state, ...this.config, count: state.count, color: state.color, mode: state.mode, interaction: state.interaction };
+    // A sequence is clocked on the server; late-joining screens enter its current phase.
+    if (state.sequenceAt !== this.sequenceStamp) {
+      this.sequenceStamp = state.sequenceAt;
+      this.sequenceTime = Math.max(0, ((state.paused && state.pauseAt ? state.pauseAt : this.getClock()) - state.sequenceAt) / 1000);
+    }
+    if (state.sequenceAt) {
+      if (!state.paused) this.sequenceTime += dt;
+      const q = this.sequenceTime;
+      const smooth = (a, b, x) => { const v = Math.max(0, Math.min(1, (x - a) / (b - a))); return v * v * (3 - 2 * v); };
+      c.distance = 132 * smooth(3, 15, q);
+      c.opacity = 0.48 * smooth(3, 12, q);
+      c.redRatio = 0.34 * smooth(2, 11, q);
+      c.speed = 0.3 + 0.35 * smooth(1, 8, q);
+    }
+    if (!state.paused) {
+      this.t += dt * c.speed;
+      this.update(dt, c);
+      for (const p of this.pulses) p.age += dt;
+      this.pulses = this.pulses.filter(p => p.age < 3.5);
+    }
+    this.draw(dt, c, state);
+    this.frames++;
+    if (now - this.lastStats > 750) {
+      this.fps = Math.round(this.frames * 1000 / Math.max(1, now - this.lastStats));
+      this.onStats({ fps: this.fps, count: this.points.length, lines: this.drawnEdges || 0,
+        sequence: state.sequenceAt ? Math.min(1, this.sequenceTime / 18) : 0 });
+      this.lastStats = now; this.frames = 0;
+    }
+  }
+  update(dt, c) {
+    const frame = dt * 60, time = this.t;
+    for (const [k, p] of this.interactors) if (performance.now() - p.at > 450) this.interactors.delete(k);
+    for (const p of this.points) {
+      let fx = Math.sin(p.y * 0.004 + time * 0.24) * 0.013 + Math.cos(p.x * 0.003 - time * 0.12) * 0.011;
+      let fy = Math.cos(p.x * 0.0038 + time * 0.2) * 0.013 - Math.sin(p.y * 0.004 + time * 0.17) * 0.01;
+      const dx = p.x - 960, dy = p.y - 540;
+      if (c.mode === 'gather') {
+        fx += (960 + Math.cos(p.phase + time * 0.1) * (75 + p.scale * 205) - p.x) * 0.00065;
+        fy += (540 + Math.sin(p.phase + time * 0.1) * (45 + p.scale * 130) - p.y) * 0.00065;
+      } else if (c.mode === 'orbit') {
+        fx += -dy * 0.0002 - dx * 0.00002; fy += dx * 0.00008 - dy * 0.00004;
+      } else if (c.mode === 'breathe') {
+        const breath = 1 + Math.sin(time * 0.75) * 0.12;
+        fx += (960 + (p.homeX - 960) * breath - p.x) * 0.0003;
+        fy += (540 + (p.homeY - 540) * breath - p.y) * 0.0003;
+      }
+      // Soft boundary: no visible snapping at the edges of the stage.
+      if (p.x < 20) fx += (20 - p.x) * 0.0007;
+      if (p.x > 1900) fx -= (p.x - 1900) * 0.0007;
+      if (p.y < 20) fy += (20 - p.y) * 0.0007;
+      if (p.y > 1060) fy -= (p.y - 1060) * 0.0007;
+      for (const it of this.interactors.values()) {
+        const ix = 960 + (it.x * 1920 - 960) / c.zoom;
+        const iy = 540 + (it.y * 1080 - 540) / c.zoom;
+        const px = p.x - ix, py = p.y - iy, dist = Math.hypot(px, py) || 1;
+        if (dist < 300) {
+          const f = (1 - dist / 300) * (c.interaction === 'attract' ? -0.25 : 0.6);
+          fx += px / dist * f; fy += py / dist * f;
+        }
+      }
+      p.vx = (p.vx + fx * frame * c.speed) * Math.pow(0.984, frame);
+      p.vy = (p.vy + fy * frame * c.speed) * Math.pow(0.984, frame);
+      p.x += p.vx * frame * c.speed; p.y += p.vy * frame * c.speed;
+    }
+  }
+  isRed(p, c) { return c.color === 'red' || (c.color === 'dual' && p.red < c.redRatio); }
+  draw(dt, c, state) {
+    const ctx = this.ctx;
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    ctx.fillStyle = state.blackout || this.forceClear || c.trail < 0.01 ? '#000000' : `rgba(0,0,0,${Math.max(0.06, 1 - c.trail)})`;
+    ctx.fillRect(0, 0, this.w, this.h); this.forceClear = false;
+    if (state.blackout) { this.drawnEdges = 0; return; }
+    ctx.translate(this.offsetX + 960 * this.scale, this.offsetY + 540 * this.scale);
+    ctx.scale(this.scale * c.zoom, this.scale * c.zoom); ctx.translate(-960, -540);
+    const cell = Math.max(20, c.distance), grid = new Map(), near = c.distance * c.distance;
+    for (const p of this.points) {
+      p.cx = Math.floor(p.x / cell); p.cy = Math.floor(p.y / cell);
+      const k = p.cx + ',' + p.cy;
+      if (!grid.has(k)) grid.set(k, []); grid.get(k).push(p);
+    }
+    this.drawnEdges = 0; const step = state.paused ? 0 : dt * 1.9;
+    if (c.distance > 2 && c.opacity > 0.001) for (const p of this.points) {
+      let neighbors = 0;
+      outer: for (let gy = -1; gy <= 1; gy++) for (let gx = -1; gx <= 1; gx++) {
+        const list = grid.get((p.cx + gx) + ',' + (p.cy + gy));
+        if (!list) continue;
+        for (const q of list) {
+          if (q.id <= p.id) continue;
+          const dx = q.x - p.x, dy = q.y - p.y, d2 = dx * dx + dy * dy;
+          if (d2 > near || d2 < 4) continue;
+          const key = p.id * 2048 + q.id;
+          let e = this.edges.get(key);
+          if (!e) { e = { growth: 0, seen: this.t }; this.edges.set(key, e); }
+          e.growth = Math.min(1, e.growth + step); e.seen = this.t;
+          const alpha = Math.pow(1 - Math.sqrt(d2) / c.distance, 1.2) * c.opacity * c.brightness;
+          const red = this.isRed(p, c) && (this.isRed(q, c) || c.color === 'dual');
+          ctx.strokeStyle = red ? '#ff514f' : '#d5dce2'; ctx.globalAlpha = Math.min(1, alpha);
+          ctx.lineWidth = c.lineWidth;
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + dx * e.growth, p.y + dy * e.growth); ctx.stroke();
+          this.drawnEdges++;
+          if (++neighbors >= 7) break outer;
+        }
+      }
+    }
+    if (this.frames % 50 === 0) for (const [key, e] of this.edges) {
+      if (this.t - e.seen > 0.5 || this.edges.size > 15000) this.edges.delete(key);
+    }
+    // Glows are small layered discs rather than expensive canvas shadow blurs.
+    for (const p of this.points) {
+      let pulse = 0;
+      for (const wave of this.pulses) {
+        const d = Math.hypot(p.x - wave.x, p.y - wave.y);
+        pulse = Math.max(pulse, Math.max(0, 1 - Math.abs(d - wave.age * 440) / 100) * (1 - wave.age / 3.5));
+      }
+      const red = this.isRed(p, c), color = red ? '#ff504f' : '#f4f5f6';
+      const size = c.size * p.scale * (1 + pulse * 1.6);
+      const a = (0.55 + Math.sin(this.t + p.phase) * 0.16 + p.twinkle * 0.25 + pulse) * c.brightness;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = Math.min(0.2, a * 0.10); ctx.beginPath(); ctx.arc(p.x, p.y, size * 4.3, 0, 6.283); ctx.fill();
+      ctx.globalAlpha = Math.min(0.45, a * 0.24); ctx.beginPath(); ctx.arc(p.x, p.y, size * 2, 0, 6.283); ctx.fill();
+      ctx.globalAlpha = Math.min(1, a); ctx.beginPath(); ctx.arc(p.x, p.y, size, 0, 6.283); ctx.fill();
+    }
+    for (const wave of this.pulses) {
+      ctx.strokeStyle = '#ff615b'; ctx.globalAlpha = Math.max(0, (1 - wave.age / 3.5) * 0.28);
+      ctx.lineWidth = 0.6; ctx.beginPath(); ctx.arc(wave.x, wave.y, wave.age * 440, 0, 6.283); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+}
+
+</script>
+  <script>
+/* CONNECTIONS · browser application / no build step or external requests. */
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const { defaults, clean, presets } = Connections;
+  const uid = () => (globalThis.crypto?.randomUUID?.() || Date.now().toString(36) + Math.random().toString(36).slice(2));
+  const client = uid();
+  const params = new URLSearchParams(location.search);
+  const fragment = new URLSearchParams(location.hash.slice(1));
+  let mode = params.get('mode') || fragment.get('mode') || (location.pathname.endsWith('/display') ? 'display' : location.pathname.endsWith('/control') ? 'control' : 'studio');
+  if (!['display', 'control', 'studio'].includes(mode)) mode = 'studio';
+  let key = fragment.get('key') || params.get('key') || safeStorage('session', 'get', 'connections-key') || '';
+  let state = { ...defaults }, connected = false, transport = 'starting', info = null, peerState = {};
+  let clockOffset = 0, serverVersion = -1, stream = null, channel = null;
+  let pendingPatch = {}, inFlightPatch = {}, pendingActions = [], sending = false, sendTimer;
+  let renderer, pointerTimer = null, pendingPointer = null, dragKey = null, toastTimer, lastFocus;
+  const acted = new Set();
+  const format = { count: v => Math.round(v).toLocaleString('en-US'), distance: v => Math.round(v) + ' px',
+    speed: v => Number(v).toFixed(2) + ' ×', size: v => Number(v).toFixed(1) + ' px',
+    lineWidth: v => Number(v).toFixed(1) + ' px', opacity: v => Math.round(v * 100) + '%',
+    brightness: v => Math.round(v * 100) + '%', redRatio: v => Math.round(v * 100) + '%',
+    trail: v => Math.round(v * 100) + '%', zoom: v => Number(v).toFixed(2) + ' ×' };
+  const sceneNames = { isolate: 'ISOLATE', call: 'CALL', connect: 'CONNECT', collapse: 'COLLAPSE', custom: 'CUSTOM', sequence: 'SEQUENCE' };
+  function safeStorage(type, method, name, value) {
+    try {
+      const store = type === 'session' ? sessionStorage : localStorage;
+      if (method === 'get') return store.getItem(name);
+      if (method === 'set') { store.setItem(name, value); return true; }
+    } catch { return null; }
+  }
+  function escape(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function toast(message) { $('toast').textContent = message; $('toast').classList.add('visible'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('visible'), 3500); }
+  function clock() { return Date.now() + clockOffset; }
+  function setMode(next) {
+    mode = next; document.body.dataset.mode = mode;
+    document.title = 'CONNECTIONS — ' + (mode === 'display' ? 'Projection' : mode === 'control' ? 'Controller' : 'Live Visual Instrument');
+    $('stageKicker').textContent = mode === 'control' ? '01 / TOUCH CONTROLLER' : '01 / LIVE CANVAS';
+    $('sessionTag').textContent = mode === 'control' ? 'CONTROL MODE' : 'STUDIO MODE';
+    if (renderer) renderer.resize();
+  }
+  function modeURL(role, base) {
+    const url = new URL(base || location.href);
+    if (transport === 'live') { url.pathname = '/' + role; url.search = ''; }
+    else url.searchParams.set('mode', role);
+    url.hash = transport === 'live' && key ? 'key=' + encodeURIComponent(key) : '';
+    return url.href;
+  }
+  function status() {
+    const statusEl = $('connectionStatus');
+    statusEl.classList.toggle('live', transport === 'live' && connected);
+    statusEl.classList.toggle('offline', transport === 'live' && !connected);
+    const label = transport === 'live' ? (connected ? 'LIVE LINK' : 'RECONNECTING') : transport === 'local' ? 'LOCAL PREVIEW' : 'CONNECTING';
+    $('statusLabel').textContent = label;
+    const nDisplay = peerState.display || 0, nControl = (peerState.control || 0) + (peerState.studio || 0);
+    $('footerStatus').textContent = transport === 'live' ? (connected ? `출력 ${nDisplay} · 조작 ${nControl} / LIVE` : '연결 끊김 · 자동 재접속 중') : 'LOCAL PREVIEW / 이 기기에서만';
+    $('panelSubtitle').textContent = transport === 'live' && connected ? `02 / LIVE CONTROL · 출력 ${nDisplay}대` : '02 / VISUAL PARAMETERS';
+    $('localNotice').classList.toggle('visible', transport === 'local');
+  }
+  function makeSlider(parent, spec) {
+    const [name, ko, en, min, max, step] = spec;
+    const group = document.createElement('div'); group.className = 'control-group';
+    group.innerHTML = `<label class="control-label" for="s-${name}"><span>${ko}<span class="en">${en}</span></span><output id="o-${name}" for="s-${name}"></output></label><div class="range-wrap"><input id="s-${name}" data-param="${name}" type="range" min="${min}" max="${max}" step="${step}" value="${state[name]}" aria-label="${ko}"></div><div class="range-ends"><span>${format[name](min)}</span><span>${format[name](max)}</span></div>`;
+    $(parent).appendChild(group);
+    const input = group.querySelector('input');
+    input.addEventListener('pointerdown', () => { dragKey = name; });
+    input.addEventListener('input', () => {
+      const patch = { [name]: Number(input.value), scene: 'custom' };
+      if (['distance', 'opacity', 'speed', 'redRatio'].includes(name)) patch.sequenceAt = 0;
+      change(patch);
+    });
+    input.addEventListener('change', () => { dragKey = null; syncUI(); });
+  }
+  [ ['count','점의 수','PARTICLES',60,1800,10], ['distance','연결 거리','DISTANCE',0,260,1],
+    ['size','점 크기','POINT SIZE',0.4,4,0.1], ['lineWidth','선 굵기','LINE WIDTH',0.2,2.5,0.1],
+    ['opacity','선 밝기','LINE OPACITY',0,1,0.01], ['brightness','전체 밝기','BRIGHTNESS',0.1,1.8,0.01]
+  ].forEach(spec => makeSlider('visualSliders', spec));
+  makeSlider('colorSlider', ['redRatio','빨간 점 비율','RED RATIO',0,1,0.01]);
+  [ ['speed','움직임 속도','SPEED',0,2.5,0.01], ['trail','잔상','TRAILS',0,0.92,0.01],
+    ['zoom','확대·축소','ZOOM',0.5,2.5,0.01]
+  ].forEach(spec => makeSlider('motionSliders', spec));
+  const cues = [ ['isolate','고립','점으로 남아 있기'], ['call','호출','신호와 함께 깨어나기'],
+    ['connect','연결','하나의 네트워크 되기'], ['collapse','붕괴','연결을 풀고 흩어지기'] ];
+  const cuePoints = [[13,29],[31,12],[45,38],[62,21],[84,9],[102,32],[119,17],[79,43]];
+  cues.forEach(([id, title, desc], idx) => {
+    const button = document.createElement('button'); button.className = 'cue'; button.dataset.cue = id;
+    const paths = idx === 0 ? '' : cuePoints.slice(0, idx === 1 ? 4 : 7).map((p,i) => `<path d="M${p[0]} ${p[1]}L${cuePoints[(i+1)%8][0]} ${cuePoints[(i+1)%8][1]}${idx > 1 ? 'L'+cuePoints[(i+3)%8][0]+' '+cuePoints[(i+3)%8][1] : ''}"/>`).join('');
+    button.innerHTML = `<span class="cue-num">0${idx+1}</span><svg class="cue-visual" viewBox="0 0 132 53" aria-hidden="true"><g stroke="${idx===3?'#d34c4a':'#7d858e'}" stroke-width=".7" fill="none" opacity=".7">${paths}</g><g>${cuePoints.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="1.7" fill="${idx>0 && i%3===0?'#ff5754':'#d3d8df'}"/>`).join('')}</g></svg><div class="cue-title">${title}</div><small>${desc}</small>`;
+    button.addEventListener('click', () => cue(id)); $('cueGrid').appendChild(button);
+  });
+  function syncUI() {
+    for (const input of document.querySelectorAll('[data-param]')) {
+      const name = input.dataset.param;
+      if (dragKey !== name) input.value = state[name];
+      const value = Number(input.value);
+      input.style.setProperty('--pct', ((value - Number(input.min)) / (Number(input.max) - Number(input.min)) * 100) + '%');
+      $('o-' + name).textContent = format[name](value);
+      input.setAttribute('aria-valuetext', format[name](value));
+    }
+    for (const [sel, k, attr] of [['[data-color]','color','color'], ['[data-motion]','mode','motion'], ['[data-interaction]','interaction','interaction'], ['[data-cue]','scene','cue']]) {
+      for (const b of document.querySelectorAll(sel)) {
+        const active = b.dataset[attr] === state[k]; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active));
+      }
+    }
+    $('pauseLabel').textContent = state.paused ? '재생' : '일시정지';
+    $('pauseBtn').setAttribute('aria-pressed', String(state.paused)); $('pauseBtn').classList.toggle('active', state.paused);
+    $('blackoutBtn').textContent = state.blackout ? '암전 해제' : '암전'; $('blackoutBtn').classList.toggle('active', state.blackout); $('blackoutBtn').setAttribute('aria-pressed', String(state.blackout));
+    $('statScene').textContent = state.blackout ? 'BLACKOUT' : sceneNames[state.scene] || 'CUSTOM';
+    $('gestureHint').textContent = state.interaction === 'attract' ? '화면을 눌러 점을 끌어당기세요. 두 손가락으로 확대·축소.' : '화면을 드래그해 점을 밀어내세요. 두 손가락으로 확대·축소.';
+    $('colorSlider').style.opacity = state.color === 'dual' ? '1' : '.4';
+    $('s-redRatio').disabled = state.color !== 'dual';
+    $('sequenceBtn').classList.toggle('active', Boolean(state.sequenceAt));
+  }
+  function processAction(a) {
+    if (!a || acted.has(a.id)) return;
+    acted.add(a.id); if (acted.size > 2500) acted.delete(acted.values().next().value);
+    renderer?.action(a);
+  }
+  function localTiming(patch) {
+    const now = clock();
+    if (patch.sequenceAt > 0) { patch.sequenceAt = now; patch.pauseAt = 0; patch.paused = false; }
+    else if (patch.paused === true && !state.paused) patch.pauseAt = now;
+    else if (patch.paused === false && state.paused) {
+      if (state.sequenceAt && !('sequenceAt' in patch)) patch.sequenceAt = state.sequenceAt + now - state.pauseAt;
+      patch.pauseAt = 0;
+    }
+    return patch;
+  }
+  function change(input) {
+    if (transport === 'live' && !connected) { toast('아직 연결되지 않았습니다. 기기 연결 상태를 확인하세요.'); syncUI(); return false; }
+    const outgoing = clean(input);
+    const patch = localTiming({ ...outgoing });
+    state = { ...state, ...patch }; syncUI();
+    if (transport === 'live') { Object.assign(pendingPatch, outgoing); scheduleSend(); }
+    else {
+      channel?.postMessage({ kind: 'state', source: client, state });
+      safeStorage('local', 'set', 'connections-preview-state', JSON.stringify(state));
+    }
+    return true;
+  }
+  function action(type, data = {}) {
+    if (transport === 'live' && !connected) return;
+    const a = { ...data, type, client, id: uid() };
+    processAction(a);
+    if (transport === 'live') { pendingActions.push(a); scheduleSend(); }
+    else channel?.postMessage({ kind: 'action', source: client, action: a });
+  }
+  function scheduleSend() { if (!sendTimer && !sending) sendTimer = setTimeout(flush, 35); }
+  async function flush() {
+    clearTimeout(sendTimer); sendTimer = null;
+    if (sending || !connected || transport !== 'live') return;
+    if (!Object.keys(pendingPatch).length && !pendingActions.length) return;
+    sending = true;
+    const patch = pendingPatch, actions = pendingActions;
+    pendingPatch = {}; pendingActions = []; inFlightPatch = patch;
+    try {
+      const result = await request('/api/update', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Session-Key': key }, body: JSON.stringify({ source: client, patch, actions }) });
+      inFlightPatch = {}; accept(result);
+    } catch (error) {
+      inFlightPatch = {}; pendingPatch = {}; pendingActions = [];
+      toast('명령을 보내지 못했습니다. 연결을 다시 확인하고 있어요.');
+      try { const snap = await request('/api/state?key=' + encodeURIComponent(key)); accept(snap); }
+      catch { connected = false; status(); }
+    } finally { sending = false; if (Object.keys(pendingPatch).length || pendingActions.length) scheduleSend(); }
+  }
+  function accept(packet) {
+    if (packet.actions) packet.actions.forEach(processAction);
+    if (packet.peers) peerState = packet.peers;
+    if (Number.isFinite(packet.serverTime)) clockOffset = packet.serverTime - Date.now();
+    if (packet.state && (packet.version ?? 0) >= serverVersion) {
+      serverVersion = packet.version ?? 0;
+      state = { ...defaults, ...clean(packet.state), ...inFlightPatch, ...pendingPatch }; syncUI();
+    }
+    status();
+  }
+  async function request(url, options = {}, timeout = 5000) {
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const r = await fetch(url, { ...options, signal: controller.signal, cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return await r.json();
+    } finally { clearTimeout(timer); }
+  }
+  function localMode() {
+    transport = 'local'; connected = true;
+    try {
+      const saved = JSON.parse(safeStorage('local', 'get', 'connections-preview-state') || 'null');
+      if (saved) state = { ...defaults, ...clean(saved), paused: false, blackout: false, sequenceAt: 0, pauseAt: 0 };
+    } catch { /* An invalid local preset must not stop rendering. */ }
+    try {
+      channel = new BroadcastChannel('connections-preview-v1');
+      channel.onmessage = ({ data }) => {
+        if (!data || data.source === client) return;
+        if (data.kind === 'hello') channel.postMessage({ kind: 'state', source: client, state });
+        if (data.kind === 'state') { state = { ...defaults, ...clean(data.state) }; syncUI(); }
+        if (data.kind === 'action') processAction(data.action);
+      };
+      channel.postMessage({ kind: 'hello', source: client });
+    } catch { /* Standalone file browsers may prohibit cross-tab messaging. */ }
+    syncUI(); status();
+  }
+  async function connect() {
+    if (location.protocol === 'file:') return localMode();
+    try {
+      info = await request('/api/hello' + (key ? '?key=' + encodeURIComponent(key) : ''));
+      if (info.app !== 'connections-live') return localMode();
+      transport = 'live'; connected = false; status();
+      if (info.requiresKey) { connectionModal(true); return; }
+      key = info.key; safeStorage('session','set','connections-key', key);
+      accept(info);
+      stream?.close();
+      stream = new EventSource(`/api/events?key=${encodeURIComponent(key)}&role=${mode}&client=${encodeURIComponent(client)}`);
+      stream.addEventListener('snapshot', e => { connected = true; accept(JSON.parse(e.data)); });
+      stream.addEventListener('update', e => { connected = true; accept(JSON.parse(e.data)); });
+      stream.addEventListener('presence', e => { peerState = JSON.parse(e.data); status(); });
+      stream.onerror = () => { connected = false; status(); };
+    } catch {
+      if (transport === 'live') { connected = false; status(); toast('서버에 접속할 수 없습니다. 주소와 Wi-Fi를 확인하세요.'); }
+      else localMode();
+    }
+  }
+  function cue(id) {
+    if (!presets[id]) return;
+    if (!change({ ...presets[id], paused: false, blackout: false, pauseAt: 0, sequenceAt: 0 })) return;
+    if (id === 'call') action('pulse');
+    if (id === 'collapse') action('explode');
+    toast(cues.find(c => c[0] === id)[1] + ' 장면');
+  }
+  function startSequence() {
+    if (change({ ...presets.connect, scene: 'sequence', sequenceAt: clock(), paused: false, blackout: false })) {
+      action('reset'); toast('18초 동안 점이 하나씩 연결됩니다.');
+    }
+  }
+  function switchTab(name, focus = false) {
+    for (const tab of document.querySelectorAll('[data-tab]')) {
+      const yes = tab.dataset.tab === name; tab.setAttribute('aria-selected', String(yes)); tab.tabIndex = yes ? 0 : -1;
+      $(tab.getAttribute('aria-controls')).hidden = !yes;
+      if (yes && focus) tab.focus();
+    }
+    $('panelScroll').scrollTop = 0;
+  }
+  for (const tab of document.querySelectorAll('[data-tab]')) {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    tab.addEventListener('keydown', e => {
+      if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
+      e.preventDefault(); const names = ['visual','motion','scenes'], i = names.indexOf(tab.dataset.tab);
+      switchTab(names[e.key === 'Home' ? 0 : e.key === 'End' ? 2 : (i + (e.key === 'ArrowRight' ? 1 : 2)) % 3], true);
+    });
+  }
+  document.querySelectorAll('[data-color]').forEach(b => b.addEventListener('click', () => change({ color: b.dataset.color, scene: 'custom' })));
+  document.querySelectorAll('[data-motion]').forEach(b => b.addEventListener('click', () => change({ mode: b.dataset.motion, scene: 'custom' })));
+  document.querySelectorAll('[data-interaction]').forEach(b => b.addEventListener('click', () => change({ interaction: b.dataset.interaction })));
+  $('sequenceBtn').addEventListener('click', startSequence);
+  $('pauseBtn').addEventListener('click', () => change({ paused: !state.paused }));
+  $('pulseBtn').addEventListener('click', () => action('pulse'));
+  $('blackoutBtn').addEventListener('click', () => change({ blackout: !state.blackout }));
+  $('explodeBtn').addEventListener('click', () => action('explode'));
+  $('gatherBtn').addEventListener('click', () => change({ mode: 'gather', scene: 'custom', paused: false }));
+  $('resetBtn').addEventListener('click', () => { if (change({ ...defaults })) { action('reset'); toast('기본 설정으로 되돌렸습니다.'); } });
+  $('openDisplayBtn').addEventListener('click', () => {
+    const opened = window.open(modeURL('display'), '_blank');
+    if (!opened) toast('팝업이 차단되었습니다. 브라우저에서 팝업을 허용하세요.');
+    else opened.opener = null;
+  });
+  $('brandHome').addEventListener('click', e => { e.preventDefault(); location.href = modeURL('studio'); });
+  $('displayBackBtn').addEventListener('click', () => { location.href = modeURL('studio'); });
+  async function fullscreen() {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+      else { toast('이 브라우저에서는 전체화면 버튼을 지원하지 않습니다. 컴퓨터의 전체화면 기능을 사용하세요.'); return; }
+      if (mode === 'display') document.body.classList.add('chrome-hidden');
+    } catch { toast('브라우저가 전체화면 전환을 허용하지 않았습니다. F11 또는 브라우저 메뉴를 사용하세요.'); }
+  }
+  $('displayFullscreenBtn').addEventListener('click', fullscreen);
+  $('hideChromeBtn').addEventListener('click', () => document.body.classList.add('chrome-hidden'));
+  // Keep a controller's screen awake when the browser and its security context allow it.
+  let wakeLock;
+  async function keepAwake() { try { if ('wakeLock' in navigator && document.visibilityState === 'visible') wakeLock = await navigator.wakeLock.request('screen'); } catch {} }
+  document.addEventListener('pointerdown', keepAwake, { once: true });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { keepAwake(); if (transport === 'live' && !connected) connect(); } });
+  document.addEventListener('keydown', e => {
+    if (!$('modalBackdrop').hidden) return;
+    if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+    const k = e.key.toLowerCase();
+    if (k === ' ') { e.preventDefault(); change({ paused: !state.paused }); }
+    else if (['1','2','3','4'].includes(k)) cue(cues[Number(k)-1][0]);
+    else if (k === 'p') action('pulse'); else if (k === 'e') action('explode');
+    else if (k === 'b') change({ blackout: !state.blackout }); else if (k === 'f') fullscreen();
+    else if (k === 'h' && mode === 'display') document.body.classList.toggle('chrome-hidden');
+  });
+  // Pointer events cover mouse, pen and multi-touch. Only the canvas disables scrolling.
+  const pointers = new Map(); let pinchStart = 0, pinchZoom = 1, gestureStart = 0, heldPosition = null, holdTimer;
+  function pointerSend(data) {
+    pendingPointer = data;
+    if (!pointerTimer) pointerTimer = setTimeout(() => { pointerTimer = null; if (pendingPointer) action('pointer', pendingPointer); pendingPointer = null; }, 45);
+  }
+  function releaseRemotePointer() { clearTimeout(pointerTimer); pointerTimer = null; pendingPointer = null; heldPosition = null; clearInterval(holdTimer); holdTimer = null; action('pointer', { active: false }); }
+  $('stage').addEventListener('pointerdown', e => {
+    if (e.button && e.button !== 0) return;
+    e.preventDefault(); $('stage').setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); gestureStart = performance.now();
+    if (pointers.size === 1) {
+      heldPosition = renderer.toStage(e.clientX, e.clientY);
+      pointerSend({ ...heldPosition, active: true });
+      clearInterval(holdTimer); holdTimer = setInterval(() => { if (heldPosition) pointerSend({ ...heldPosition, active: true }); }, 160);
+    } else if (pointers.size === 2) {
+      releaseRemotePointer(); const [a,b] = [...pointers.values()]; pinchStart = Math.hypot(a.x-b.x,a.y-b.y); pinchZoom = state.zoom;
+    }
+  });
+  $('stage').addEventListener('pointermove', e => {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2) {
+      const [a,b] = [...pointers.values()];
+      if (pinchStart > 3) change({ zoom: Math.max(0.5, Math.min(2.5, pinchZoom * Math.hypot(a.x-b.x,a.y-b.y) / pinchStart)) });
+    } else if (pointers.size === 1) { heldPosition = renderer.toStage(e.clientX, e.clientY); pointerSend({ ...heldPosition, active: true }); }
+  });
+  function pointerEnd(e) {
+    if (!pointers.has(e.pointerId)) return;
+    if (pointers.size === 1 && performance.now() - gestureStart < 200 && e.type === 'pointerup') action('pulse', renderer.toStage(e.clientX, e.clientY));
+    pointers.delete(e.pointerId); releaseRemotePointer(); pinchStart = 0;
+    if (pointers.size === 1) {
+      const p = [...pointers.values()][0]; heldPosition = renderer.toStage(p.x,p.y);
+      holdTimer = setInterval(() => { if (heldPosition) pointerSend({ ...heldPosition, active: true }); }, 160);
+    }
+  }
+  ['pointerup','pointercancel','lostpointercapture'].forEach(name => $('stage').addEventListener(name, pointerEnd));
+  window.addEventListener('blur', () => { pointers.clear(); releaseRemotePointer(); dragKey = null; });
+  window.addEventListener('pointerup', () => { dragKey = null; });
+  $('stage').addEventListener('wheel', e => { e.preventDefault(); change({ zoom: Math.max(0.5,Math.min(2.5,state.zoom - e.deltaY * 0.001)) }); }, { passive: false });
+  function showModal(title, html) {
+    lastFocus = document.activeElement; $('modalTitle').textContent = title; $('modalContent').innerHTML = html;
+    $('modalBackdrop').hidden = false; $('modalBox').focus();
+  }
+  function closeModal() { $('modalBackdrop').hidden = true; lastFocus?.focus?.(); }
+  $('modalClose').addEventListener('click', closeModal);
+  $('modalBackdrop').addEventListener('click', e => { if (e.target === $('modalBackdrop')) closeModal(); });
+  $('modalBox').addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.preventDefault(); closeModal(); }
+    if (e.key === 'Tab') {
+      const items = [...$('modalBox').querySelectorAll('button,input,a,select,[tabindex="0"]')].filter(el => !el.disabled && !el.hidden);
+      if (!items.length) return; const first=items[0],last=items[items.length-1];
+      if (e.shiftKey && (document.activeElement===first || document.activeElement===$('modalBox'))) { e.preventDefault();last.focus(); }
+      else if (!e.shiftKey && document.activeElement===last) { e.preventDefault();first.focus(); }
+    }
+  });
+  async function copy(text, field) {
+    try { await navigator.clipboard.writeText(text); toast('연결 주소를 복사했습니다.'); }
+    catch {
+      if (field) { field.focus(); field.select(); try { if (document.execCommand('copy')) { toast('연결 주소를 복사했습니다.'); return; } } catch {} }
+      toast('주소를 길게 누르거나 선택해서 복사하세요.');
+    }
+  }
+  function connectionModal(join = false) {
+    if (transport !== 'live') {
+      showModal('다른 기기와 연결하기', `<p>현재는 이 파일 안에서 실행하는 미리보기입니다. 아이폰·아이패드에서 컴퓨터를 조작하려면 실행 패키지의 서버가 필요합니다.</p><h3>컴퓨터에서 서버 실행</h3><p>Node.js 20 이상을 설치한 뒤, 압축을 푼 폴더에서 <code>node server.cjs</code>를 실행하세요. 또는 Mac용·Windows용 실행 파일을 사용하세요.</p><h3>같은 Wi-Fi에서 모바일 연결</h3><p>컴퓨터 브라우저에서 서버 화면을 열고 ‘기기 연결’을 누르면 모바일용 주소가 표시됩니다. 이 주소로 모바일에서 접속하면 조작 값이 실시간으로 전달됩니다.</p><p class="alert">HTML 파일만 서로 다른 기기에서 여는 것은 원격 연결이 아닙니다. 정적 웹호스팅만으로도 기기간 동기화는 되지 않습니다.</p>`);
+      return;
+    }
+    if (join || !key || info?.requiresKey) {
+      showModal('컨트롤 세션에 연결', `<p>컴퓨터 화면의 ‘기기 연결’에 표시된 연결 코드를 입력하세요. 이 코드를 아는 기기만 화면을 조작할 수 있습니다.</p><form id="joinForm"><label for="joinKey" class="control-label">연결 코드</label><input id="joinKey" class="field" type="text" spellcheck="false" autocapitalize="characters" autocomplete="off" placeholder="16자리 연결 코드" maxlength="128"><div class="modal-row"><button class="primary" type="submit">연결하기</button></div></form><p class="alert" id="joinError"></p>`);
+      $('joinForm').addEventListener('submit', async e => { e.preventDefault(); key = $('joinKey').value.trim(); if (!key) return; closeModal(); await connect(); });
+      $('joinKey').focus(); return;
+    }
+    const isLocal = ['localhost','127.0.0.1','[::1]'].includes(location.hostname);
+    const bases = isLocal ? (info.addresses?.length ? info.addresses : [location.origin]) : [location.origin];
+    const base = bases[0];
+    showModal('기기 연결', `<p>컴퓨터는 <strong>송출 화면</strong>을, 아이폰·아이패드는 <strong>컨트롤 화면</strong>을 여세요. 로컬 실행 중에는 같은 Wi-Fi 또는 공유기에 연결되어 있어야 합니다.</p>${bases.length>1?`<label class="control-label" for="networkSelect">연결할 네트워크 주소</label><select class="field" id="networkSelect">${bases.map(a=>`<option value="${escape(a)}">${escape(a)}</option>`).join('')}</select>`:''}<h3>아이폰·아이패드용 컨트롤 주소</h3><div class="modal-row"><input class="field" id="controlLink" readonly aria-label="모바일 컨트롤 주소" value="${escape(modeURL('control',base))}"><button id="copyControl">복사</button></div><div class="modal-row"><button id="shareControl">주소 공유</button><button id="sameControl">컨트롤 화면 열기</button></div><h3>연결 코드</h3><code class="key-code">${escape(key)}</code><p>주소 대신 <code>${escape(base)}/control</code>로 접속한 뒤 위 코드를 입력해도 됩니다.</p><h3>프로젝터 출력</h3><p>컴퓨터에서 ‘송출 화면 열기’를 누르고, 새 창을 프로젝터 쪽 화면으로 옮긴 다음 ‘전체화면으로 송출’을 누르세요. 운영체제의 디스플레이 설정은 <strong>복제 대신 확장</strong>으로 두세요.</p><p class="alert">주소와 연결 코드는 제어 권한을 포함합니다. 운영자에게만 공유하세요. 게스트 Wi-Fi의 기기 간 통신 차단, 방화벽, VPN은 연결을 막을 수 있습니다.</p>`);
+    const link = $('controlLink');
+    $('copyControl').addEventListener('click', () => copy(link.value, link));
+    $('sameControl').addEventListener('click', () => { location.href = link.value; });
+    $('shareControl').addEventListener('click', async () => {
+      try { if (navigator.share) await navigator.share({ title: 'CONNECTIONS 컨트롤러', url: link.value }); else await copy(link.value, link); }
+      catch (e) { if (e.name !== 'AbortError') copy(link.value, link); }
+    });
+    $('networkSelect')?.addEventListener('change', e => { link.value = modeURL('control',e.target.value); });
+  }
+  $('connectBtn').addEventListener('click', () => connectionModal());
+  $('displayConnectBtn').addEventListener('click', () => connectionModal());
+  function loadPresets() { try { const p = JSON.parse(safeStorage('local','get','connections-presets') || '[]'); return Array.isArray(p) ? p.slice(0,20) : []; } catch { return []; } }
+  function renderPresets() {
+    const list = loadPresets(); $('savedList').innerHTML = list.length ? '' : '<p class="empty-note">아직 저장한 설정이 없습니다.</p>';
+    list.forEach((p,i) => {
+      const row = document.createElement('div'); row.className = 'saved-item';
+      const apply = document.createElement('button'); apply.textContent = p.name || '이름 없는 설정';
+      apply.addEventListener('click', () => { if (change({ ...clean(p.settings), paused:false, blackout:false, sequenceAt:0, pauseAt:0, scene:'custom' })) toast('저장한 설정을 적용했습니다.'); });
+      const del = document.createElement('button'); del.textContent = '×'; del.setAttribute('aria-label',(p.name || '설정')+' 삭제');
+      del.addEventListener('click', () => { list.splice(i,1); safeStorage('local','set','connections-presets',JSON.stringify(list)); renderPresets(); });
+      row.append(apply,del); $('savedList').appendChild(row);
+    });
+  }
+  $('savePresetBtn').addEventListener('click', () => {
+    showModal('현재 설정 저장', '<p>이 브라우저에서 다시 불러올 장면 이름을 정하세요.</p><form id="saveForm"><label class="control-label" for="presetName">장면 이름</label><input class="field" id="presetName" maxlength="36" value="나의 장면"><div class="modal-row"><button class="primary" type="submit">저장하기</button></div></form>');
+    $('presetName').focus(); $('presetName').select();
+    $('saveForm').addEventListener('submit', e => {
+      e.preventDefault(); const name = $('presetName').value.trim(); if (!name) return;
+      const list = loadPresets(); list.unshift({ name, settings: { ...state, sequenceAt:0, pauseAt:0, paused:false, blackout:false } });
+      const success = safeStorage('local','set','connections-presets',JSON.stringify(list.slice(0,20)));
+      if (!success) { toast('브라우저 저장소를 사용할 수 없습니다. JSON 내보내기를 사용하세요.'); return; }
+      closeModal(); renderPresets(); toast('설정을 저장했습니다.');
+    });
+  });
+  $('exportBtn').addEventListener('click', () => {
+    const data = { app:'connections-live', version:1, exportedAt:new Date().toISOString(), settings:{ ...state, sequenceAt:0, pauseAt:0, paused:false, blackout:false } };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+    const a = document.createElement('a'); a.href=url; a.download='connections-preset.json'; document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+  });
+  $('importBtn').addEventListener('click', () => $('importFile').click());
+  $('importFile').addEventListener('change', async e => {
+    const file = e.target.files[0]; if (!file) return;
+    try {
+      if(file.size>65536) throw new Error('파일이 너무 큽니다.');
+      const data=JSON.parse(await file.text());
+      if(data.app!=='connections-live' || data.version!==1 || !data.settings) throw new Error('CONNECTIONS 설정 파일이 아닙니다.');
+      const settings=clean(data.settings);
+      if(!Object.keys(settings).length) throw new Error('설정 값이 없습니다.');
+      if(change({ ...settings,sequenceAt:0,pauseAt:0,paused:false,blackout:false,scene:'custom' })) toast('설정 파일을 불러왔습니다.');
+    } catch(error) { toast('불러오기 실패: '+error.message); }
+    finally {e.target.value='';}
+  });
+  setMode(mode); syncUI(); renderPresets();
+  try {
+    renderer = new ConnectionRenderer($('stage'), () => state, stats => {
+      $('statParticles').textContent=stats.count.toLocaleString('en-US'); $('statLines').textContent=stats.lines.toLocaleString('en-US');
+      $('statFps').textContent=stats.fps+' FPS'; $('sequenceProgress').style.width=(stats.sequence*100)+'%';
+    },clock);
+  } catch(error) { toast(error.message); }
+  // Read-only diagnostics for integration tests and technical troubleshooting.
+  Object.defineProperty(window,'CONNECTIONS_DIAGNOSTICS',{value:()=>({state:{...state},transport,connected,peers:{...peerState},mode,version:serverVersion,canvas:{width:$('stage').width,height:$('stage').height},lines:renderer?.drawnEdges||0,pulses:renderer?.pulses.length||0,activeTouches:renderer?.interactors.size||0}),writable:false});
+  connect();
+  window.addEventListener('pagehide',()=>{stream?.close();channel?.close();clearInterval(holdTimer);});
+  window.addEventListener('pageshow',e=>{if(e.persisted) connect();});
+})();
+
+</script>
+</body>
+</html>
