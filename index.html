@@ -367,14 +367,15 @@ class ConnectionRenderer {
   const uid = () => (globalThis.crypto?.randomUUID?.() || Date.now().toString(36) + Math.random().toString(36).slice(2));
   const client = uid();
   const params = new URLSearchParams(location.search);
+  const showroom = params.get('showroom') === '1';
   const fragment = new URLSearchParams(location.hash.slice(1));
   let mode = params.get('mode') || fragment.get('mode') || (location.pathname.endsWith('/display') ? 'display' : location.pathname.endsWith('/control') ? 'control' : 'studio');
   if (!['display', 'control', 'studio'].includes(mode)) mode = 'studio';
   let key = fragment.get('key') || params.get('key') || safeStorage('session', 'get', 'connections-key') || '';
-  let state = { ...defaults }, connected = false, transport = 'starting', info = null, peerState = {};
+  let state = { ...defaults, ...(showroom ? { zoom: 1.5 } : {}) }, connected = false, transport = 'starting', info = null, peerState = {};
   let clockOffset = 0, serverVersion = -1, stream = null, channel = null;
   let pendingPatch = {}, inFlightPatch = {}, pendingActions = [], sending = false, sendTimer;
-  let renderer, pointerTimer = null, pendingPointer = null, dragKey = null, toastTimer, lastFocus;
+  let renderer, pointerTimer = null, pendingPointer = null, dragKey = null, toastTimer, lastFocus, showroomPulseTimer;
   const acted = new Set();
   const format = { count: v => Math.round(v).toLocaleString('en-US'), distance: v => Math.round(v) + ' px',
     speed: v => Number(v).toFixed(2) + ' ×', size: v => Number(v).toFixed(1) + ' px',
@@ -788,9 +789,20 @@ class ConnectionRenderer {
   } catch(error) { toast(error.message); }
   // Read-only diagnostics for integration tests and technical troubleshooting.
   Object.defineProperty(window,'CONNECTIONS_DIAGNOSTICS',{value:()=>({state:{...state},transport,connected,peers:{...peerState},mode,version:serverVersion,canvas:{width:$('stage').width,height:$('stage').height},lines:renderer?.drawnEdges||0,pulses:renderer?.pulses.length||0,activeTouches:renderer?.interactors.size||0}),writable:false});
-  connect();
-  window.addEventListener('pagehide',()=>{stream?.close();channel?.close();clearInterval(holdTimer);});
-  window.addEventListener('pageshow',e=>{if(e.persisted) connect();});
+  function startShowroom() {
+    clearInterval(showroomPulseTimer);
+    state = { ...defaults, zoom: 1.5 };
+    transport = 'local'; connected = true; syncUI(); status();
+    if (!renderer) return;
+    renderer.action({ type: 'reset' });
+    renderer.action({ type: 'pulse' });
+    showroomPulseTimer = setInterval(() => {
+      if (!document.hidden) renderer.action({ type: 'pulse' });
+    }, 2800);
+  }
+  if (showroom) startShowroom(); else connect();
+  window.addEventListener('pagehide',()=>{stream?.close();channel?.close();clearInterval(holdTimer);clearInterval(showroomPulseTimer);});
+  window.addEventListener('pageshow',e=>{if(e.persisted){if(showroom)startShowroom();else connect();}});
 })();
 
 </script>
