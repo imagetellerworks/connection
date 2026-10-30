@@ -25,7 +25,7 @@ body[data-mode=display]{background:#000;overflow:hidden}body[data-mode=display] 
 
 <link rel="stylesheet" href="mindful-ui.css">
 <script src="mindful-ui.js" data-scene="connection" defer></script>
-</head>
+<script>if(new URLSearchParams(location.search).get('showroom')==='1'){const s=document.createElement('style');s.textContent="#panel,#hint,.hidden-controls,.display-toolbar,.display-welcome,.toast,#toast{display:none!important}";document.head.append(s)}</script></head>
 <body data-mode="studio">
   <header class="topbar">
     <a class="brand" href="#" id="brandHome" aria-label="CONNECTIONS 스튜디오">
